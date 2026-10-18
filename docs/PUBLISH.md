@@ -163,3 +163,33 @@ node test/pack-check.mjs       # 打包产物（52 个文件 / 213 KB）
 cd D:\DSH-Workspaces\06-金融学习与skill转插件\packages\dsh-invest-bundle
 pwsh -File scripts\publish.ps1 -Owner woshipixiu1234 -PrOnly
 ```
+
+---
+
+## 9. 插件市场索引源（自建，立即可搜到）
+
+社区目录 `awesome-dsh-plugin` 合入 PR #7926 之后，所有人都能在市场里搜到本插件。合入之前，用仓库自带的索引源，让自己（或任何拿到这个 URL 的人）立刻在「插件 → 发现」里搜到并安装：
+
+- 索引文件：`market/index.json`（格式 1，用官方 `parseMarketIndex` 校验通过）
+- 索引 URL：https://raw.githubusercontent.com/woshipixiu1234/dsh-invest-bundle/main/market/index.json
+- 安装目标：`git+https://github.com/woshipixiu1234/dsh-invest-bundle.git#<commit>` —— 索引里固定提交号，不随 main 漂移
+
+加进本机需要两处 profile 改动（重启 DSH 生效）：
+
+1. `C:\Users\woshi\.dsh\profiles\desktop\package.json` 的 `dsh.profile.bundles` 增加
+   `@deepseek-ai/dsh-experimental-plugin-market-bundle` —— DSH 自带的可选组合包，提供「插件 → 发现」页与 `plugin_market` 工具。
+2. `C:\Users\woshi\.dsh\profiles\desktop\cordis.patch.yml` 增加：
+
+```yaml
+- id: plugin-market
+  config:
+    indexes:
+      - https://raw.githubusercontent.com/woshipixiu1234/dsh-invest-bundle/main/market/index.json
+      - https://awesome-dsh-plugin.com/index.json
+```
+
+等价做法：在「插件 → 发现 → 索引源」里用界面添加这两个 URL。第二个源（社区目录，2953 个插件）可选；只加第一个也能搜到本插件。
+
+索引的维护：改了 `package.json` 的 version 之后重跑 `node scripts/gen-market-index.mjs`（写入版本号、HEAD 提交号、提交时间戳），提交推送即生效——索引 URL 指向 main，但安装目标仍固定在那个提交。CI 里 `node scripts/gen-market-index.mjs --check` 保证文件不会和仓库现状脱节。
+
+关掉「发现」页恢复原状：从 `dsh.profile.bundles` 删掉那一行、删掉 `plugin-market` 的 patch 条目，重启即可（本插件本身不受影响，仍是 profile 里的一条 bundle）。

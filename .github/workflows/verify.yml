@@ -38,3 +38,6 @@ jobs:
 
       - name: 数值工具可执行性
         run: python tools/financial_rigor.py calc --expr "(1+0.08)**10"
+
+      - name: 市场索引与仓库现状一致
+        run: node scripts/gen-market-index.mjs --check

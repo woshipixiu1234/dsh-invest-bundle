@@ -1,0 +1,67 @@
+{
+  "format": 1,
+  "title": {
+    "en": "dsh-invest-bundle index",
+    "zh": "投研插件索引源"
+  },
+  "description": {
+    "en": "A one-plugin index source maintained by the author, so that dsh-invest-bundle can be searched for and installed from the Discover tab before the community catalog lists it.",
+    "zh": "由作者维护的单插件索引源，用来在插件市场的「发现」页直接搜到并安装 dsh-invest-bundle。"
+  },
+  "metadata": {
+    "categories": {
+      "skill": {
+        "title": {
+          "en": "Skills",
+          "zh": "技能"
+        }
+      }
+    },
+    "labels": {},
+    "sortKeys": {}
+  },
+  "plugins": [
+    {
+      "name": "dsh-invest-bundle",
+      "title": {
+        "en": "Investment research bundle",
+        "zh": "投研插件：6 个工具 + 22 个技能"
+      },
+      "description": {
+        "en": "DSH-native equity research: web search, page extraction, source auditing, cross-verification, a whitelisted Python rigor runner and a channel probe, plus 22 skills - 21 adapted from ai-berkshire (Buffett, Munger, Duan Yongping, Li Lu) and one orchestration skill.",
+        "zh": "DSH 原生投研插件：检索、正文抓取、信源审计、跨源验证、数值严谨工具白名单与通道探测共 6 个工具，外加 22 个技能（21 个改造自 ai-berkshire 的巴菲特/芒格/段永平/李录四大师方法，1 个总控技能）。"
+      },
+      "author": "woshipixiu1234",
+      "homepage": "https://github.com/woshipixiu1234/dsh-invest-bundle#readme",
+      "repository": {
+        "url": "https://github.com/woshipixiu1234/dsh-invest-bundle"
+      },
+      "metadata": {
+        "category": "skill",
+        "keywords": [
+          "investment",
+          "research",
+          "equity",
+          "valuation",
+          "earnings",
+          "投研",
+          "研报",
+          "财报",
+          "估值"
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.1.0",
+          "publishTimestamp": 1792330812,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/woshipixiu1234/dsh-invest-bundle",
+            "commit": "43a12785bd5e7308b3003fe22b025d9a7104bc38"
+          },
+          "engines": {}
+        }
+      ]
+    }
+  ]
+}
