@@ -19,7 +19,13 @@
 上架后的标准装法：在「插件 → 发现」里搜索本插件点安装——市场条目会把 `target` 与 `registry`
 交给 `plugin_manager.install_bundle` 完成安装（本包声明了 `dsh.bundle.patch`，因此可安装）。
 
-本地开发/未上架时的装法：
+未上架时也可以直接从 GitHub 装（`plugin_manager.install_bundle` 支持 git 目标）：
+
+```
+https://github.com/woshipixiu1234/dsh-invest-bundle        # 或该仓库 release 里的 dsh-invest-bundle.tgz
+```
+
+本地开发时装法：
 
 ```jsonc
 // C:\Users\woshi\.dsh\profiles\desktop\package.json
