@@ -154,9 +154,10 @@ node test/pack-check.mjs       # 打包产物（52 个文件 / 213 KB）
 | CI（ubuntu + windows） | ✅ 绿 | `.github/workflows/verify.yml` |
 | 从 GitHub 克隆后可用性 | ✅ 已验证 | clone 后 `register.mjs` PASS、22/22 技能合法 |
 | npm 发布 | ⏸ 未做（可选） | 需要 `npm login`；安装不依赖 npm（git / tarball 均可） |
-| awesome-dsh-plugin PR | ⏳ 待仓库满 24 小时（**2026-10-19 13:31 UTC 之后**） | 投稿文件 `docs/awesome-dsh-plugin-entry.yml`（含 `tarball:`） |
+| awesome-dsh-plugin PR | ✅ 已开 [PR #7926](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/7926) | 首个 run 会因「仓库不足 1 天」变红，按检查器自己的说明留 PR 不动，它在 2026-10-19 13:31 UTC 之后自动转绿（`regate.yml` 会重跑） |
 
-24 小时后开 PR：
+投稿文件就一份：`data/plugins/woshipixiu1234__dsh-invest-bundle.yml`（内容同 `docs/awesome-dsh-plugin-entry.yml`）。
+若需要重开 PR（例如分支被删）：
 
 ```powershell
 cd D:\DSH-Workspaces\06-金融学习与skill转插件\packages\dsh-invest-bundle
