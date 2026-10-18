@@ -1,6 +1,6 @@
 {
   "name": "dsh-invest-bundle",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DSH 原生投研插件：21 个改造自 ai-berkshire 的投研技能 + 数值严谨工具 + 6 个可用的检索/抓取/审计/验证工具。",
   "type": "module",
   "main": "./index.js",

@@ -105,7 +105,7 @@ export function apply(ctx, config = {}) {
           warnings: { type: 'array', items: { type: 'string' } },
         },
       },
-      render: (r) => text(fmtSearch(r)),
+      render: (_args, value) => text(fmtSearch(value)),
       execute: async (args) => {
         const r = await search(ctx, String(args?.query || '').trim(), {
           limit: args?.limit,
@@ -137,7 +137,7 @@ export function apply(ctx, config = {}) {
           results: { type: 'array', items: { type: 'object' } },
         },
       },
-      render: (r) => text(fmtFetch(r)),
+      render: (_args, value) => text(fmtFetch(value)),
       execute: async (args) => {
         const urls = Array.isArray(args?.urls) ? args.urls : [];
         return fetchMany(ctx, urls, { max: 6, maxChars: args?.maxChars });
@@ -180,7 +180,8 @@ export function apply(ctx, config = {}) {
           sources: { type: 'array', items: { type: 'object' } },
         },
       },
-      render: (r) => {
+      render: (_args, r) => {
+        if (!r || !r.summary) return text('审计没有返回结果');
         const lines = [
           `审计 ${r.summary.total} 条：🟢 ${r.summary.trust} / 🟡 ${r.summary.caution} / 🔴 ${r.summary.discard}`,
           '',
@@ -239,7 +240,8 @@ export function apply(ctx, config = {}) {
           details: { type: 'array', items: { type: 'object' } },
         },
       },
-      render: (r) => {
+      render: (_args, r) => {
+        if (!r || !r.units) return text('验证没有返回结果');
         const lines = [
           `断言: ${r.claim}`,
           `判定: ${r.verdictZh}`,
@@ -297,7 +299,8 @@ export function apply(ctx, config = {}) {
           exitCode: { type: 'number' },
         },
       },
-      render: (r) => {
+      render: (_args, r) => {
+        if (!r) return text('工具没有返回结果');
         if (!r.ok) {
           return text([`❌ ${r.script || 'tool'} 执行失败（exit ${r.exitCode ?? '?'}）`, r.stderr || r.error || '', r.hint || ''].filter(Boolean).join('\n'));
         }
@@ -317,7 +320,8 @@ export function apply(ctx, config = {}) {
         type: 'object',
         properties: { summary: { type: 'object' }, rows: { type: 'array', items: { type: 'object' } } },
       },
-      render: (r) => {
+      render: (_args, r) => {
+        if (!r || !r.summary) return text('通道探测没有返回结果');
         const lines = [
           `通道健康度：可用 ${r.summary.ok}/${r.summary.total}；harvest ${r.summary.harvestOk}/${r.summary.harvestTotal}；缺命令 ${r.summary.missing}；缺 Key ${r.summary.needsKey}；需登录 ${r.summary.needsLogin}`,
           '',

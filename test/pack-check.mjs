@@ -119,6 +119,10 @@ check(
   '每个工具都有 name/description/parameters/execute',
 );
 check(
+  registered.every((t) => typeof t.output?.render === 'function' && t.output.render.length >= 2),
+  '每个工具的 render 接收 (args, value)（DSH 的调用约定）',
+);
+check(
   skills.every((s) => s.name && s.content && s.invocation?.modelInvocable),
   '每个技能都有 name/content/modelInvocable',
 );
