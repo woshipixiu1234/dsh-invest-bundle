@@ -1,0 +1,40 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 协议合规（离线）
+        run: node test/license-check.mjs
+
+      - name: 技能结构校验
+        run: node test/verify-skills.mjs
+
+      - name: 宿主注册冒烟（6 工具 + 22 技能）
+        run: node test/register.mjs
+
+      - name: 发布产物校验
+        run: node test/pack-check.mjs
+
+      - name: 数值工具可执行性
+        run: python tools/financial_rigor.py calc --expr "(1+0.08)**10"
