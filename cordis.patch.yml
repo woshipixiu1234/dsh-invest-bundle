@@ -1,0 +1,5 @@
+# dsh-invest-bundle patch
+# 把插件行插入启动树。服务名('invest-bundle')与 patch id 需与 package.json 的 bundle 解析一致。
+- insert:
+    - id: invest-bundle
+      name: dsh-invest-bundle
