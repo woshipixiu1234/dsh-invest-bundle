@@ -141,5 +141,24 @@ node test/verify-skills.mjs    # 22/22 frontmatter 合法
 node test/smoke.mjs            # 检索/抓取/审计/验证/通道全链路
 node test/register.mjs         # 假 ctx：注册 6 工具 + 22 技能
 node test/tools-check.mjs      # 13 个 Python 脚本真实调用
-node test/pack-check.mjs       # 打包产物（正在补）
+node test/pack-check.mjs       # 打包产物（52 个文件 / 213 KB）
+
+## 8. 本次发布的实际状态（2026-10-18）
+
+| 环节 | 状态 | 地址 / 证据 |
+| --- | --- | --- |
+| GitHub 仓库 | ✅ 已发布（public） | https://github.com/woshipixiu1234/dsh-invest-bundle |
+| 许可证 | ✅ GitHub 识别为 **MIT** | `gh api repos/… --jq .license.spdx_id` → `MIT` |
+| topics | ✅ 已加 `dsh-plugin` 等 6 个 | dsh-plugin / dsh / investment-research / equity-research / value-investing / ai-berkshire |
+| Release | ✅ v0.1.0 + 稳定名 tarball（218,367 B） | https://github.com/woshipixiu1234/dsh-invest-bundle/releases/tag/v0.1.0 |
+| CI（ubuntu + windows） | ✅ 绿 | `.github/workflows/verify.yml` |
+| 从 GitHub 克隆后可用性 | ✅ 已验证 | clone 后 `register.mjs` PASS、22/22 技能合法 |
+| npm 发布 | ⏸ 未做（可选） | 需要 `npm login`；安装不依赖 npm（git / tarball 均可） |
+| awesome-dsh-plugin PR | ⏳ 待仓库满 24 小时（**2026-10-19 13:31 UTC 之后**） | 投稿文件 `docs/awesome-dsh-plugin-entry.yml`（含 `tarball:`） |
+
+24 小时后开 PR：
+
+```powershell
+cd D:\DSH-Workspaces\06-金融学习与skill转插件\packages\dsh-invest-bundle
+pwsh -File scripts\publish.ps1 -Owner woshipixiu1234 -PrOnly
 ```

@@ -1,5 +1,8 @@
 # dsh-invest-bundle
 
+[![verify](https://github.com/woshipixiu1234/dsh-invest-bundle/actions/workflows/verify.yml/badge.svg)](https://github.com/woshipixiu1234/dsh-invest-bundle/actions/workflows/verify.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 把 **价值投资研究能力** 装进 DeepSeek Harness 的捆绑插件：22 个投研技能 + 6 个原生工具 + 12 个 Python 投研脚本，零外部 npm 依赖。
 
 - 方法论血统：[xbtlin/ai-berkshire](https://github.com/xbtlin/ai-berkshire)（MIT，16.8k★）的 21 个 Claude Code 技能，已改造为 DSH 原生技能
