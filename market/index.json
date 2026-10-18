@@ -52,12 +52,12 @@
       },
       "versions": [
         {
-          "version": "0.1.0",
-          "publishTimestamp": 1792330812,
+          "version": "0.1.1",
+          "publishTimestamp": 1792332398,
           "source": {
             "type": "git",
             "url": "https://github.com/woshipixiu1234/dsh-invest-bundle",
-            "commit": "43a12785bd5e7308b3003fe22b025d9a7104bc38"
+            "commit": "4403f9db86f32a0817ac6f2cafba04dff363c58a"
           },
           "engines": {}
         }
