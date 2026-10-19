@@ -20,28 +20,36 @@
 
 ## 安装
 
-上架后的标准装法：在「插件 → 发现」里搜索本插件点安装——市场条目会把 `target` 与 `registry`
-交给 `plugin_manager.install_bundle` 完成安装（本包声明了 `dsh.bundle.patch`，因此可安装）。
+在 DSH 桌面端的「插件 → 发现」里搜索 `dsh-invest-bundle` 安装，重启后生效。
 
-未上架时也可以直接从 GitHub 装（`plugin_manager.install_bundle` 支持 git 目标）：
+也可以用 Git 目标直接安装：
 
 ```
-https://github.com/woshipixiu1234/dsh-invest-bundle        # 或该仓库 release 里的 dsh-invest-bundle.tgz
+https://github.com/woshipixiu1234/dsh-invest-bundle
+# 或 release 附件里的 dsh-invest-bundle.tgz
 ```
 
-本地开发时装法：
+从源码开发时，把仓库放到本地，在 profile 的 `package.json` 里用 `link:` 指向仓库目录，并加入 `dsh.profile.bundles`，`pnpm install` 后重启桌面端：
 
 ```jsonc
-// C:\Users\woshi\.dsh\profiles\desktop\package.json
 "dependencies": {
-  "dsh-invest-bundle": "link:D:/DSH-Workspaces/06-金融学习与skill转插件/packages/dsh-invest-bundle"
+  "dsh-invest-bundle": "link:/path/to/dsh-invest-bundle"
 },
 "dsh": { "profile": { "bundles": [ ..., "dsh-invest-bundle" ] } }
 ```
 
-改完 `pnpm install` 后**重启 DSH 桌面端**（bundle 启动树只在启动时读取）。源码改动无需重装，因为 link 指向工作区，重启即生效。
+源码改动无需重装：bundle 启动树只在启动时读取，重启即生效。
 
-发布/更新到插件市场：改完 `package.json` 的 version 后跑 `node scripts/gen-market-index.mjs`（把版本号与当前提交写进 `market/index.json`），提交推送即生效；需要预构建包时用 `npm pack` 产出 tarball，挂到 GitHub Release 上。
+## 快速开始
+
+对模型说一句：「用 investment-team 研究贵州茅台 600519.SH，报告日 2026-10-20」。
+
+它会先调 `invest_workflow` 拿脚本与参数，再用 `workflow` 起四个并行 Agent（进度在会话面板里可见），
+交叉质证后由主笔写成 `report.md`，`invest_chart` 出图，`invest_report_pdf` 渲染成 PDF，
+最后 `invest_pdf_check` 校验页数与插图数。产物在 `reports/<公司>-深度研究-<日期>/report.pdf`。
+
+只想做单点任务时不必上 workflow：直接说「看一下这家公司的财报」或「筛一遍白酒行业」，
+对应的 `earnings-review` / `industry-funnel` 等技能会被按需调用。
 
 ## 10 个原生工具
 
@@ -114,7 +122,7 @@ node test\verify-deliverables.mjs # workflow 脚本 + PDF 管线 + 10 工具 / 2
 node test\register.mjs            # 假 ctx 验证工具 + 技能注册
 node test\smoke.mjs               # 检索/抓取/审计/验证/脚本 全链路
 node test\tools-check.mjs         # 逐个工具真实调用
-node test\pack-check.mjs          # 发布产物验收（npm pack → 解包 → import → 注册）
+node test\pack-check.mjs          # 打包产物验收（npm pack → 解包 → import → 注册）
 ```
 
 `verify-deliverables.mjs` 会检查：workflow 脚本语法（async 包装）、6 个 `phase()` 与 meta 一致、四个成员 label、PDF 完成门槛、
