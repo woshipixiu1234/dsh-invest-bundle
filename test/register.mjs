@@ -46,7 +46,7 @@ for (const s of skills) {
   console.log(`- ${s.name} | whenToUse=${(s.whenToUse || '').slice(0, 40)} | content=${s.content.length}ch`);
 }
 console.log('logs:', logs);
-if (registered.length !== 6) throw new Error(`expected 6 tools, got ${registered.length}`);
+if (registered.length !== 10) throw new Error(`expected 10 tools, got ${registered.length}`);
 if (loadSkills().length !== skills.length) throw new Error('loadSkills 与注册数量不一致');
 
 // DSH 调用 output.render(args, value)：第一参是参数对象，第二参才是执行结果。
@@ -69,6 +69,34 @@ const fixtures = {
   invest_channels: {
     summary: { ok: 1, total: 1, harvestOk: 0, harvestTotal: 0, missing: 0, needsKey: 0, needsLogin: 0 },
     rows: [],
+    note: 'n',
+  },
+  invest_chart: {
+    ok: true,
+    exitCode: 0,
+    args: ['--out-dir', 'charts', '--spec', 'spec.json'],
+    result: { charts: [{ id: 'c1', type: 'line', title: 't', path: 'c1.png' }], warnings: [] },
+  },
+  invest_report_pdf: {
+    ok: true,
+    exitCode: 0,
+    pdf: 'report.pdf',
+    docx: 'report.docx',
+    pages: 9,
+    images: 5,
+    result: { engine: 'libreoffice', bytes: 1024, warnings: [] },
+  },
+  invest_pdf_check: {
+    ok: true,
+    exitCode: 0,
+    result: { pages: 9, images: 5, text_chars: 1234, bytes: 1024, render: [] },
+  },
+  invest_workflow: {
+    ok: true,
+    meta: { name: 'four-masters-research', phases: [{ title: '① 研究简报' }] },
+    script: 'return { ok: true }',
+    args: { company: '贵州茅台' },
+    paths: {},
     note: 'n',
   },
 };

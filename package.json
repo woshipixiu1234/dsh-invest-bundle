@@ -1,7 +1,7 @@
 {
   "name": "dsh-invest-bundle",
-  "version": "0.1.1",
-  "description": "DSH 原生投研插件：21 个改造自 ai-berkshire 的投研技能 + 数值严谨工具 + 6 个可用的检索/抓取/审计/验证工具。",
+  "version": "0.2.0",
+  "description": "DSH 原生投研插件：23 个改造自 ai-berkshire 的投研技能 + 数值严谨工具 + 四大师并行 workflow（四个真实 Agent）+ 图文并茂 PDF 渲染管线。",
   "type": "module",
   "main": "./index.js",
   "exports": {
@@ -14,12 +14,17 @@
     "lib",
     "skills",
     "tools",
+    "workflows",
     "cordis.patch.yml",
     "README.md",
     "NOTICE.md",
     "docs/ADAPTATION.md",
-    "docs/HARVEST-CHANNELS.md"
+    "docs/HARVEST-CHANNELS.md",
+    "docs/report-pipeline.md"
   ],
+  "scripts": {
+    "test": "node test/verify-skills.mjs && node test/verify-deliverables.mjs"
+  },
   "keywords": [
     "dsh",
     "dsh-plugin",
@@ -28,7 +33,9 @@
     "investment-research",
     "research",
     "value-investing",
-    "finance"
+    "finance",
+    "workflow",
+    "pdf"
   ],
   "license": "MIT",
   "author": "woshipixiu1234",

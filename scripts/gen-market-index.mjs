@@ -7,7 +7,6 @@
  *   node scripts/gen-market-index.mjs --check     # 只检查是否与仓库现状一致（CI 用）
  *
  * 索引里的每个版本都固定到提交号：索引 URL 指向 main，但安装目标不会随 main 漂移。
- * 详情见 docs/PUBLISH.md 第 9 节。
  */
 import { execFileSync } from 'node:child_process'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
@@ -54,12 +53,12 @@ const index = {
     {
       name: pkg.name,
       title: {
-        en: 'Investment research bundle',
-        zh: '投研插件：6 个工具 + 22 个技能',
+        en: 'Investment research bundle: 10 tools + 23 skills',
+        zh: '投研插件：10 个工具 + 23 个技能 + 四大师 workflow',
       },
       description: {
-        en: 'DSH-native equity research: web search, page extraction, source auditing, cross-verification, a whitelisted Python rigor runner and a channel probe, plus 22 skills - 21 adapted from ai-berkshire (Buffett, Munger, Duan Yongping, Li Lu) and one orchestration skill.',
-        zh: 'DSH 原生投研插件：检索、正文抓取、信源审计、跨源验证、数值严谨工具白名单与通道探测共 6 个工具，外加 22 个技能（21 个改造自 ai-berkshire 的巴菲特/芒格/段永平/李录四大师方法，1 个总控技能）。',
+        en: 'DSH-native equity research: search / page extraction / source audit / cross-verification / numeric rigor / channel probe, plus 23 skills adapted from ai-berkshire. Ships a six-phase four-masters workflow (Duan Yongping, Buffett, Munger, Li Lu) whose four agents run in parallel in the workflow panel, a spec-driven chart engine, and a Markdown-to-PDF pipeline that renders a cover, tables, figures, captions and page numbers.',
+        zh: 'DSH 原生投研插件：检索、正文抓取、信源审计、跨源验证、数值严谨工具与通道探测共 10 个工具，外加 23 个技能（改造自 ai-berkshire 的四大师方法）。内置六阶段四大师 workflow —— 段永平/巴菲特/芒格/李录四个 Agent 在 workflow 面板并行推进 —— 再交叉质证、成稿、spec 驱动出图，最后由 Markdown 管线渲染成带封面/表格/图注/页码的图文 PDF。',
       },
       author: (pkg.author ?? '').replace(/\s*<.*?>\s*/u, '').trim() || 'dsh-invest-bundle contributors',
       homepage: pkg.homepage ?? repositoryUrl,

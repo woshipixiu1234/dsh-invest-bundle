@@ -53,7 +53,7 @@ const libFiles = files.filter((p) => p.startsWith('lib/') && p.endsWith('.js'));
 check(libFiles.length === 7, 'lib/*.js 打包完整', `${libFiles.length}/7`);
 
 const skillFiles = files.filter((p) => /^skills\/[^/]+\/SKILL\.md$/.test(p));
-check(skillFiles.length === 22, '技能 SKILL.md 数量', `${skillFiles.length}/22`);
+check(skillFiles.length === 23, '技能 SKILL.md 数量', `${skillFiles.length}/23`);
 
 const pyTools = files.filter((p) => /^tools\/[^/]+\.py$/.test(p));
 const shTools = files.filter((p) => /^tools\/[^/]+\.sh$/.test(p));
@@ -66,6 +66,18 @@ const notices = [
   files.includes('skills/UPSTREAM-NOTICE.md'),
 ];
 check(notices.every(Boolean), '协议声明随包分发（4 个文件）', notices.filter(Boolean).length + '/4');
+
+const pipelineAssets = [
+  'workflows/four-masters.js',
+  'workflows/four-masters.meta.json',
+  'tools/report/palette.py',
+  'tools/report/make_charts.py',
+  'tools/report/build_report_pdf.py',
+  'tools/report/check_pdf.py',
+  'docs/report-pipeline.md',
+];
+const missingAssets = pipelineAssets.filter((p) => !files.includes(p));
+check(missingAssets.length === 0, '四大师 workflow + PDF 管线随包分发', missingAssets.join(', ') || 'all present');
 
 const testLeak = files.filter((p) => p.startsWith('test/') || p.startsWith('scripts/') || p.startsWith('.git'));
 check(testLeak.length === 0, '开发文件未进包（test/scripts/.git）', testLeak.join(', ') || 'none');
@@ -112,8 +124,8 @@ const ctx = {
   tools: { register: (tool) => registered.push(tool) },
 };
 await mod.apply(ctx, {});
-check(registered.length === 6, '解包副本注册工具数', `${registered.length}/6`);
-check(skills.length === 22, '解包副本注册技能数', `${skills.length}/22`);
+check(registered.length === 10, '解包副本注册工具数', `${registered.length}/10`);
+check(skills.length === 23, '解包副本注册技能数', `${skills.length}/23`);
 check(
   registered.every((t) => t.name && t.description && t.parameters && typeof t.execute === 'function'),
   '每个工具都有 name/description/parameters/execute',

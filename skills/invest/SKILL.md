@@ -8,6 +8,12 @@ whenToUse: 投研,研报,研究报告,深度研究,财报分析,估值,护城河
 
 这个技能是入口。具体方法论按需调用 skills 目录下的 21 个 berkshire 技能（`investment-research`、`earnings-review`、`industry-funnel`、`quality-screen`、`investment-team` 等）。本技能只规定**顺序、工具和不可违反的底线**。
 
+## 先选路
+
+- **单点问题**（一句话估值、某条新闻、某个指标、财报里某一项）→ 直接走下面的标准流水线，产出 md。
+- **公司深度研究 / 要团队并行 / 用户要「看到 agent 进度」/ 要一份 PDF** → 走 `investment-team` 技能：调用 `invest_workflow` 取脚本，再用 `workflow` 工具发起四大师并行，最终交付 PDF。深度研究的**唯一完成判据是 PDF**（pages>=8、images>=4），不是 md。
+- **已经有稿子，只差排版** → 走 `report-publish` 技能（`invest_chart` / `invest_report_pdf` / `invest_pdf_check`）。
+
 ## 第〇步：联网可用性预检（不可跳过）
 
 1. 先调用 `invest_channels`。
@@ -25,6 +31,10 @@ whenToUse: 投研,研报,研究报告,深度研究,财报分析,估值,护城河
 | `invest_audit` | 读正文的五维可信度打分 | 来源筛选，决定谁进正文 |
 | `invest_verify` | 数字+短语覆盖率交叉验证 | 关键断言（尤其带数字的）落笔前 |
 | `invest_rigor` | 跑随包 Python 工具 | 任何计算、验算、准出审核 |
+| `invest_workflow` | 取四大师 workflow 脚本 + meta + 预填 args | 公司深度研究、团队并行、要 PDF 时 |
+| `invest_chart` | spec 驱动生成统一配色图表 | 研报插图（5-7 张） |
+| `invest_report_pdf` | report.md + meta → 图文并茂 PDF | 出最终交付物 |
+| `invest_pdf_check` | 页数/插图/渲染目检 | PDF 准出前 |
 
 ## 标准流水线
 
@@ -43,8 +53,9 @@ whenToUse: 投研,研报,研究报告,深度研究,财报分析,估值,护城河
    - `cross-validate --tolerance 1.0`（两源交叉，误差 >1% 必须标记）
    - `verify-valuation`、`three-scenario`、`benford`（n<50 只作参考）
 8. **验断言**：关键断言用 `invest_verify` 复核；`contradicted` 必须先查清哪个数字对。
-9. **落盘**：写入 `reports/<标的>-<类型>-<期间>.md`，末尾必须带「数据来源与抓取时间」表。
-10. **准出**：`invest_rigor` 跑 `report_audit.py extract` → 逐项复核 → `verdict`；判打回就改，改完再审。
+9. **落盘**：写入 `reports/<标的>-<类型>-<期间>/report.md`，末尾必须带「数据来源与抓取时间」表；封面元数据写 `report-meta.json`。
+10. **出 PDF（深度研究必做）**：`invest_chart` 生成 5-7 张图并替换正文占位符 → `invest_report_pdf` 渲染 → `invest_pdf_check` 校验 `pages>=8 && images>=4`。**md/docx 不是交付物，PDF 才是**；不达标就补图/补正文重跑。
+11. **准出**：`invest_rigor` 跑 `report_audit.py extract` → 逐项复核 → `verdict`；判打回就改，改完再审。深度研究还要检查 PDF 里每个关键数字可溯源。
 
 ## 硬性底线
 

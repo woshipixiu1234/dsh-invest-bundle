@@ -10,6 +10,7 @@ import { auditSources } from './lib/audit.js';
 import { verifyClaim } from './lib/verify.js';
 import { runFinanceTool, checkPython, ALLOWED_SCRIPTS } from './lib/rigor.js';
 import { probeChannels } from './lib/channels.js';
+import { runChartTool, runPdfTool, runPdfCheckTool, workflowBundle } from './lib/report.js';
 
 export const name = 'dsh-invest-bundle';
 export const inject = ['tools'];
@@ -68,6 +69,8 @@ export function apply(ctx, config = {}) {
   const settings = {
     python: config?.python || process.env.DSH_PYTHON || '',
     toolsDir: TOOLS_DIR,
+    root: ROOT,
+    cwd: config?.cwd || '',
   };
 
   ctx.tools.register(
@@ -339,8 +342,220 @@ export function apply(ctx, config = {}) {
     }),
   );
 
+  ctx.tools.register(
+    defineTool({
+      name: 'invest_chart',
+      description:
+        '把「图表 spec」渲染成统一配色的 PNG（matplotlib，卖方深度报告风格）。用于研报插图：spec 内联或给 specPath，PNG 落到 <outDir>/charts/。图表契约见插件 docs/report-pipeline.md §3（类型 line/bar/barh/grouped_bar/stacked_bar/combo/scatter/bubble/heatmap/waterfall/donut/area）。',
+      parameters: {
+        type: 'object',
+        properties: {
+          spec: { type: 'object', description: '图表 spec 对象（含 charts 数组），与 specPath 二选一' },
+          specPath: { type: 'string', description: '已有 spec.json 路径，与 spec 二选一' },
+          outDir: { type: 'string', description: '报告目录，PNG 写入 <outDir>/charts/' },
+          dpi: { type: 'number', description: '输出 DPI，默认 200' },
+          widthIn: { type: 'number', description: '图宽（英寸），默认 6.3' },
+          cwd: { type: 'string', description: '相对路径解析基准，默认插件进程工作目录' },
+        },
+        required: ['outDir'],
+      },
+      schema: {
+        type: 'object',
+        properties: {
+          ok: { type: 'boolean' },
+          result: { type: 'object' },
+          stdout: { type: 'string' },
+          stderr: { type: 'string' },
+          hint: { type: 'string' },
+        },
+      },
+      render: (_args, r) => {
+        if (!r) return text('图表工具没有返回结果');
+        if (!r.ok) return text([`❌ 图表生成失败（exit ${r.exitCode ?? '?'}）`, r.stderr || '', r.hint || ''].filter(Boolean).join('\n'));
+        const charts = (r.result && r.result.charts) || [];
+        const lines = [`✅ 已生成 ${charts.length} 张图（${(r.args || []).includes('--out-dir') ? 'charts/' : ''}）`];
+        for (const c of charts) lines.push(`- ${c.id || '?'} · ${c.type || ''} · ${c.title || ''}\n  ${c.path || ''}`);
+        const warnings = (r.result && r.result.warnings) || [];
+        if (warnings.length) lines.push('', `warnings: ${warnings.join(' | ')}`);
+        if (!charts.length && r.stdout) lines.push('', clamp(r.stdout, 2000));
+        return text(lines.join('\n'));
+      },
+      execute: async (args) => runChartTool(args || {}, settings),
+    }),
+  );
+
+  ctx.tools.register(
+    defineTool({
+      name: 'invest_report_pdf',
+      description:
+        '把 report.md + report-meta.json 渲染成图文并茂的 A4 PDF（封面、结论框、表格、图注、页脚页码）。引擎自动降级：DSH LibreOffice Kit → soffice → Word COM → 失败退出。这是投研任务的最终交付物，不是 md。契约见 docs/report-pipeline.md §4-6。',
+      parameters: {
+        type: 'object',
+        properties: {
+          md: { type: 'string', description: 'report.md 路径（绝对路径或相对 cwd）' },
+          outDir: { type: 'string', description: '报告目录，docx/pdf 落在该目录，默认 md 所在目录' },
+          meta: { type: 'object', description: '封面元数据对象，与 metaPath 二选一' },
+          metaPath: { type: 'string', description: 'report-meta.json 路径，与 meta 二选一' },
+          engine: {
+            type: 'string',
+            enum: ['auto', 'libreoffice', 'soffice', 'word', 'chrome'],
+            description: 'PDF 引擎，默认 auto',
+          },
+          noDocx: { type: 'boolean', description: '成功后删除中间 docx（默认保留便于用户二次编辑）' },
+          cwd: { type: 'string', description: '相对路径解析基准' },
+        },
+        required: ['md'],
+      },
+      schema: {
+        type: 'object',
+        properties: {
+          ok: { type: 'boolean' },
+          pdf: { type: 'string' },
+          docx: { type: 'string' },
+          pages: { type: 'number' },
+          images: { type: 'number' },
+          result: { type: 'object' },
+          stderr: { type: 'string' },
+          hint: { type: 'string' },
+        },
+      },
+      render: (_args, r) => {
+        if (!r) return text('PDF 工具没有返回结果');
+        const res = r.result || {};
+        if (!r.ok) {
+          return text(
+            [
+              `❌ PDF 生成失败（exit ${r.exitCode ?? '?'}）`,
+              r.stderr || '',
+              r.hint || '',
+              '',
+              '⚠️ 不允许把 md 当成交付物：修好引擎或排版后必须重跑，直到拿到 PDF。',
+            ]
+              .filter(Boolean)
+              .join('\n'),
+          );
+        }
+        const lines = [
+          `✅ PDF：${r.pdf || res.pdf || '(未返回路径)'}`,
+          `页数 ${r.pages ?? res.pages ?? '?'} · 插图 ${r.images ?? res.images ?? '?'} 张 · 引擎 ${res.engine || '?'} · ${Math.round((res.bytes || 0) / 1024)}KB`,
+          `DOCX：${r.docx || res.docx || '（未保留）'}`,
+        ];
+        if ((res.warnings || []).length) lines.push('', `warnings: ${res.warnings.join(' | ')}`);
+        lines.push('', '下一步：invest_pdf_check 做页数与插图终检。');
+        return text(lines.join('\n'));
+      },
+      execute: async (args) => runPdfTool(args || {}, settings),
+    }),
+  );
+
+  ctx.tools.register(
+    defineTool({
+      name: 'invest_pdf_check',
+      description:
+        'PDF 准出检查：页数、内嵌图片数、可提取文本量，可选把前 N 页渲染成 PNG 做目检。页数 >=8 且插图 >=4 才算图文并茂的深度报告。',
+      parameters: {
+        type: 'object',
+        properties: {
+          pdf: { type: 'string', description: 'report.pdf 路径' },
+          renderPages: { type: 'number', description: '渲染前 N 页为 PNG（默认不渲染）' },
+          renderDir: { type: 'string', description: 'PNG 输出目录，默认 <pdf 目录>/preview' },
+          cwd: { type: 'string', description: '相对路径解析基准' },
+        },
+        required: ['pdf'],
+      },
+      schema: {
+        type: 'object',
+        properties: {
+          ok: { type: 'boolean' },
+          pages: { type: 'number' },
+          images: { type: 'number' },
+          result: { type: 'object' },
+          stderr: { type: 'string' },
+          hint: { type: 'string' },
+        },
+      },
+      render: (_args, r) => {
+        if (!r) return text('PDF 检查没有返回结果');
+        if (!r.ok && !r.result) return text([`❌ PDF 检查失败（exit ${r.exitCode ?? '?'}）`, r.stderr || '', r.hint || ''].filter(Boolean).join('\n'));
+        const res = r.result || {};
+        const pages = res.pages ?? 0;
+        const images = res.images ?? 0;
+        const pass = pages >= 8 && images >= 4;
+        const lines = [
+          `${pass ? '✅ 达标' : '⚠️ 未达标'}：${pages} 页 / ${images} 张内嵌图 / 文本 ${res.text_chars ?? '?'} 字符 / ${Math.round((res.bytes || 0) / 1024)}KB`,
+          `门槛：页数 >=8、插图 >=4`,
+        ];
+        if (res.render && res.render.length) lines.push('', '渲染页：', ...res.render.map((p) => `- ${p}`));
+        return text(lines.join('\n'));
+      },
+      execute: async (args) => runPdfCheckTool(args || {}, settings),
+    }),
+  );
+
+  ctx.tools.register(
+    defineTool({
+      name: 'invest_workflow',
+      description:
+        '装载「四大师并行投研」workflow：返回可直接传给 workflow 工具的 meta、script 与预填 args（路径已按插件安装位置解析）。这样四个真实 Agent 的进度会出现在会话 workflow 面板里。运行前先调用本工具，再把 script 原样传出去。',
+      parameters: {
+        type: 'object',
+        properties: {
+          company: { type: 'string', description: '公司简称，如「贵州茅台」' },
+          ticker: { type: 'string', description: '股票代码，如 600519.SH' },
+          market: { type: 'string', description: '市场，A股/港股/美股，默认 A股' },
+          asOf: { type: 'string', description: '报告日 YYYY-MM-DD，默认今天' },
+          outDir: { type: 'string', description: '报告输出目录，默认 reports/<公司>-深度研究-<日期>' },
+          coverPath: { type: 'string', description: '可选封面图（横向 3:2 以上）' },
+          peers: { type: 'string', description: '可选同业对照公司，逗号分隔' },
+          wordTarget: { type: 'string', description: '目标字数区间，默认 8000-10000' },
+          cwd: { type: 'string', description: '相对路径解析基准（通常传当前工作区）' },
+        },
+        required: ['company'],
+      },
+      schema: {
+        type: 'object',
+        properties: {
+          ok: { type: 'boolean' },
+          meta: { type: 'object' },
+          script: { type: 'string' },
+          scriptPath: { type: 'string' },
+          metaPath: { type: 'string' },
+          args: { type: 'object' },
+          paths: { type: 'object' },
+          note: { type: 'string' },
+          error: { type: 'string' },
+        },
+      },
+      render: (_args, r) => {
+        if (!r) return text('workflow 装载没有返回结果');
+        if (!r.ok) return text([`❌ ${r.error || 'workflow 装载失败'}`, r.hint || ''].filter(Boolean).join('\n'));
+        const lines = [
+          `workflow：${r.meta?.name || 'four-masters-research'}`,
+          `阶段：${(r.meta?.phases || []).map((p) => p.title).join(' → ')}`,
+          '',
+          'args：',
+          JSON.stringify(r.args, null, 2),
+          '',
+          'paths：',
+          JSON.stringify(r.paths, null, 2),
+          '',
+          r.note || '',
+          '',
+          '调用方式：workflow({ meta, script, args })，script 必须原样（下方代码块全文）。',
+          '运行结束后只认 PDF：pdf.pages >= 8 且 images >= 4 才算完成。',
+          '',
+          '```js',
+          String(r.script || ''),
+          '```',
+        ];
+        return text(lines.join('\n'));
+      },
+      execute: async (args) => workflowBundle(args || {}, settings),
+    }),
+  );
+
   registerSkills(ctx, log);
-  log.info?.(`dsh-invest-bundle ready · tools=6 · skills=${countSkills()}`);
+  log.info?.(`dsh-invest-bundle ready · tools=10 · skills=${countSkills()}`);
 }
 
 function countSkills() {
@@ -410,3 +625,4 @@ function registerSkills(ctx, log) {
 
 // 便于测试：导出内部函数
 export { loadSkills, fmtSearch, fmtFetch };
+export { runChartTool, runPdfTool, runPdfCheckTool, workflowBundle } from './lib/report.js';
