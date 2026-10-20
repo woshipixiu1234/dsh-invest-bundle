@@ -40,6 +40,12 @@ https://github.com/woshipixiu1234/dsh-invest-bundle
 
 源码改动无需重装：bundle 启动树只在启动时读取，重启即生效。
 
+## 环境要求
+
+- **Python 3.10+**：`invest_rigor` 的投研脚本只用标准库（`xueqiu_scraper.py` 除外），Node 侧零第三方依赖
+- **图表与 PDF**：需要 `python-docx`、`matplotlib`（`pip install python-docx matplotlib`），否则 `invest_chart` / `invest_report_pdf` 不可用
+- **PDF 转换引擎**：按可用性自动降级 LibreOffice Kit → 本机 `soffice` → Word COM → Chrome headless；只要 docx 时不需要
+
 ## 快速开始
 
 对模型说一句：「用 investment-team 研究贵州茅台 600519.SH，报告日 2026-10-20」。
